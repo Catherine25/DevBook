@@ -1,15 +1,207 @@
-﻿using System.Windows;
+﻿using DevBook.Data;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Windows;
+using System.Windows.Documents;
+using RichTextBox = System.Windows.Controls.RichTextBox;
 
 namespace DevBook
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : Window
     {
+        private Vocabulary _vocabulary;
+
+        // todo: ask about it at start
+        private readonly Language _nativeLanguage;
+        // todo: ask about it as loading file
+        private readonly Language _targetLanguage;
+
         public MainWindow()
         {
+            _nativeLanguage = Data.Language.Russian;
+            _targetLanguage = Data.Language.Japanese;
+
+            List<Command> commands = new List<Command>
+            {
+                new Command() { Name = "ReadText", Action = ReadText }
+            };
+
             InitializeComponent();
+            xcomboBox.ItemsSource = commands;
+            xOkButton.Click += xOkButtonClicked;
+
+            _vocabulary = new Vocabulary(Environment.CurrentDirectory);
+        }
+
+        private void xOkButtonClicked(object sender, RoutedEventArgs e)
+        {
+            Command command = (xcomboBox.SelectedItem as Command);
+            if(command != null)
+                command.Action();
+        }
+
+        private void ReadText()
+        {
+            // RequestWindow requestWindow = new RequestWindow();
+            // if (requestWindow.ShowDialog() == true) { }
+
+            //todo: get the file using dialog
+            string path = @"C:\Users\Xiaomi\Documents\01.txt";
+            string text = "";
+
+            using (FileStream fs = File.OpenRead(path))
+            {
+                byte[] b = new byte[512];
+                
+                UTF8Encoding temp = new UTF8Encoding();
+                //Encoding temp = Encoding.GetEncoding(932);
+
+                while (fs.Read(b, 0, b.Length) > 0)
+                    text += temp.GetString(b);
+            }
+
+            Debug.WriteLine(Environment.CurrentDirectory);
+            ShowText(text);
+        }
+
+        public void ShowText(string text)
+        {
+            // split by blocks
+            List<string> blocks = SplitToBlocks(text);
+
+            // split by sentences
+            var paragraphs = SplitToSentences(blocks, _vocabulary.Dot);
+
+            foreach (Paragraph item in paragraphs)
+                xText.Document.Blocks.Add(item);
+            
+            xText.SelectionChanged += Textbox_SelectionChanged;
+            xSave.Click += XSave_Click;
+        }
+
+        private void XSave_Click(object sender, RoutedEventArgs e)
+        {
+            Translation translation = new Translation
+            {
+                Target = new Word
+                {
+                    Value = xWord1.Text,
+                    Language = _targetLanguage
+                },
+
+                Native = new Word
+                {
+                    Value = xWord2.Text,
+                    Language = _nativeLanguage
+                }
+            };
+
+            _vocabulary.AddWord(translation.Target);
+            _vocabulary.AddWord(translation.Native);
+            _vocabulary.AddTranslation(translation);
+        }
+        
+        private void Textbox_SelectionChanged(object sender, RoutedEventArgs e)
+        {
+            string selectedText = (sender as RichTextBox).Selection.Text;
+            xWord1.Text = selectedText;
+
+            // todo: hightlight the text
+
+            if (selectedText != "" && selectedText != " ")
+            {
+                Word word = _vocabulary.GetWord(selectedText, _targetLanguage);
+                Translation translation = _vocabulary.GetTranslation(selectedText, _targetLanguage, _nativeLanguage);
+
+                //check if found
+                //if (word != null)
+                xWord2.Text = translation.Native.Value;
+            }
+        }
+
+        private List<Paragraph> SplitToSentences(List<string> textBlocks, char dot)
+        {
+            List<Paragraph> paragraphs = new List<Paragraph>();
+
+            foreach (string item in textBlocks)
+            {
+                Paragraph paragraph = new Paragraph();
+
+                List<string> sentences = item.Split(dot).ToList();
+
+                sentences.RemoveAll(x => x == dot.ToString() + "\r");
+                sentences.RemoveAll(x => x == "\r" + dot.ToString());
+
+                foreach (string s in sentences)
+                {
+                    paragraph.Inlines.AddRange(FindKnownTranslations(s + dot));
+                }
+
+                paragraphs.Add(paragraph);
+            }
+            
+            return paragraphs;
+        }
+
+        private List<string> SplitToBlocks(string text)
+        {
+            List<string> blocks = text.Split('\n').ToList();
+            blocks.RemoveAll(x => x == "\r");
+            return blocks;
+        }
+
+        private List<Run> FindKnownTranslations(string text)
+        {
+            List<Translation> knownTranslations = _vocabulary.GetKnownTranslations(text);
+            List<bool> indexes = new List<bool>();
+
+            for (int i = 0; i < text.Length; i++)
+                indexes.Add(false);
+
+            foreach (Translation translation in knownTranslations)
+            {
+                int index = text.IndexOf(translation.Target.Value);
+                int length = translation.Target.Value.Length;
+
+                for (int i = index; i < index + length; i++)
+                    indexes[i] = true;
+            }
+
+            return CreateRuns(text, indexes);
+        }
+
+        //todo: it's a kind of shit
+        private List<Run> CreateRuns(string text, List<bool> indexesToMark)
+        {
+            List<Run> runs = new List<Run>();
+
+            while(indexesToMark.Count != 0)
+            {
+                Run run = new Run();
+                
+                bool initialValue = indexesToMark[0];
+
+                int counter = 1;
+                for (int i = 1; i < indexesToMark.Count; i++)
+                    if(indexesToMark[i] == initialValue)
+                        counter++;
+                    else break;
+
+                if (initialValue)
+                    run.Foreground = SystemColors.MenuHighlightBrush;
+
+                run.Text = text.Substring(0, counter);
+                text = text.Remove(0, counter);
+                indexesToMark.RemoveRange(0, counter);
+
+                runs.Add(run);
+            }
+
+            return runs;      
         }
     }
 }
