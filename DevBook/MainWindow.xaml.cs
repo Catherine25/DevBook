@@ -1,9 +1,12 @@
 ﻿using DevBook.Data;
+using DevBook.Data.Adapters;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Windows;
 using System.Windows.Documents;
@@ -120,6 +123,31 @@ namespace DevBook
                 //check if found
                 //if (word != null)
                 xWord2.Text = translation.Native.Value;
+
+                var httpWebRequest = WebRequest.Create($"https://jisho.org/api/v1/search/words?keyword=\"{selectedText}\"");
+                var httpResponse = (HttpWebResponse)httpWebRequest.GetResponse();
+                
+                using var streamReader = new StreamReader(httpResponse.GetResponseStream());
+
+                JishoAdapter data = JsonConvert.DeserializeObject<JishoAdapter>(streamReader.ReadToEnd());
+
+                if (xWord2.Text == "" || xWord2.Text == null)
+                    if (data.Data.Count > 0)
+                    {
+                        //then build string
+                        string toShow = "";
+
+                        foreach (Sense sense in data.Data[0].Senses)
+                        {
+                            foreach (string definition in sense.EnglishDefinitions)
+                            {
+                                toShow += definition + "\t";
+                            }
+                            toShow += "\n";
+                        }
+
+                        xWord2.Text = toShow;
+                    }
             }
         }
 
