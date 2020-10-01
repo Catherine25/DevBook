@@ -10,6 +10,7 @@ using System.Net;
 using System.Text;
 using System.Windows;
 using System.Windows.Documents;
+using System.Windows.Input;
 using RichTextBox = System.Windows.Controls.RichTextBox;
 
 namespace DevBook
@@ -17,6 +18,7 @@ namespace DevBook
     public partial class MainWindow : Window
     {
         private Vocabulary _vocabulary;
+        private List<Command> _commands;
 
         // todo: ask about it at start
         private readonly Language _nativeLanguage;
@@ -28,16 +30,37 @@ namespace DevBook
             _nativeLanguage = Data.Language.Russian;
             _targetLanguage = Data.Language.Japanese;
 
-            List<Command> commands = new List<Command>
+            _commands = new List<Command>
             {
                 new Command() { Name = "ReadText", Action = ReadText }
             };
 
             InitializeComponent();
-            xcomboBox.ItemsSource = commands;
+            xcomboBox.ItemsSource = _commands;
+            xcomboBox.MouseWheel += XcomboBox_MouseWheel;
             xOkButton.Click += xOkButtonClicked;
 
             _vocabulary = new Vocabulary(Environment.CurrentDirectory);
+        }
+
+        private void XcomboBox_MouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            int next = _commands.IndexOf(xcomboBox.SelectedItem as Command);
+
+            if (e.Delta > 0)
+            {
+                next++; // up
+                if(next >= _commands.Count)
+                    next = 0;
+            }
+            else if(e.Delta < 0)
+            {
+                next--; // down
+                if(next <= -1)
+                    next = _commands.Count - 1;
+            }
+
+            xcomboBox.SelectedItem = _commands[next];
         }
 
         private void xOkButtonClicked(object sender, RoutedEventArgs e)
