@@ -12,6 +12,7 @@ using System.Windows;
 using System.Windows.Documents;
 using System.Windows.Input;
 using RichTextBox = System.Windows.Controls.RichTextBox;
+using Lang = DevBook.Data.Language;
 
 namespace DevBook
 {
@@ -21,14 +22,14 @@ namespace DevBook
         private List<Command> _commands;
 
         // todo: ask about it at start
-        private readonly Language _nativeLanguage;
+        private readonly Lang _nativeLanguage;
         // todo: ask about it as loading file
-        private readonly Language _targetLanguage;
+        private readonly Lang _targetLanguage;
 
         public MainWindow()
         {
-            _nativeLanguage = Data.Language.Russian;
-            _targetLanguage = Data.Language.Japanese;
+            _nativeLanguage = Lang.Russian;
+            _targetLanguage = Lang.Japanese;
 
             _commands = new List<Command>
             {
