@@ -18,10 +18,7 @@ namespace DevBook
         private readonly Language _nativeLanguage;
         private string _text;
 
-        public ReadTextControl()
-        {
-            InitializeComponent();
-        }
+        public ReadTextControl() => InitializeComponent();
 
         public ReadTextControl(Vocabulary vocabulary, Language target, Language native, string text)
         {
@@ -52,30 +49,21 @@ namespace DevBook
 
         private void XSave_Click(object sender, RoutedEventArgs e)
         {
-            Translation translation = new Translation
-            {
-                Target = new Word
-                {
-                    Value = xWord1.Text,
-                    Language = _targetLanguage
-                },
+            Word target = new Word(xTargetWord.Text, _targetLanguage);
+            Word native = new Word(xNativeWord.Text, _nativeLanguage);
 
-                Native = new Word
-                {
-                    Value = xWord2.Text,
-                    Language = _nativeLanguage
-                }
-            };
+            Translation translation = new Translation(target, native);
 
             _vocabulary.AddWord(translation.Target);
             _vocabulary.AddWord(translation.Native);
+
             _vocabulary.AddTranslation(translation);
         }
 
         private void Textbox_SelectionChanged(object sender, RoutedEventArgs e)
         {
             string selectedText = (sender as RichTextBox).Selection.Text;
-            xWord1.Text = selectedText;
+            xTargetWord.Text = selectedText;
 
             // todo: hightlight the text
 
@@ -86,7 +74,7 @@ namespace DevBook
 
                 //check if found
                 //if (word != null)
-                xWord2.Text = translation.Native.Value;
+                xNativeWord.Text = translation.Native.Value;
 
                 var httpWebRequest = WebRequest.Create($"https://jisho.org/api/v1/search/words?keyword=\"{selectedText}\"");
                 var httpResponse = (HttpWebResponse)httpWebRequest.GetResponse();
@@ -94,8 +82,9 @@ namespace DevBook
                 using var streamReader = new StreamReader(httpResponse.GetResponseStream());
 
                 JishoAdapter data = JsonConvert.DeserializeObject<JishoAdapter>(streamReader.ReadToEnd());
+                //data.Data[0].Japanese[0].Reading
 
-                if (xWord2.Text == "" || xWord2.Text == null)
+                if (xNativeWord.Text == "" || xNativeWord.Text == null)
                     if (data.Data.Count > 0)
                     {
                         //then build string
@@ -104,13 +93,12 @@ namespace DevBook
                         foreach (Sense sense in data.Data[0].Senses)
                         {
                             foreach (string definition in sense.EnglishDefinitions)
-                            {
                                 toShow += definition + "\t";
-                            }
+
                             toShow += "\n";
                         }
 
-                        xWord2.Text = toShow;
+                        xNativeWord.Text = toShow;
                     }
             }
         }
@@ -179,9 +167,7 @@ namespace DevBook
                 sentences.RemoveAll(x => x == "\r" + dot.ToString());
 
                 foreach (string s in sentences)
-                {
                     paragraph.Inlines.AddRange(FindKnownTranslations(s + dot));
-                }
 
                 paragraphs.Add(paragraph);
             }
