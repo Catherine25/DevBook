@@ -77,10 +77,7 @@ namespace DevBook
             Word word = _vocabulary.GetWord(selectedText, _targetLanguage);
             Translation translation = _vocabulary.GetTranslation(selectedText, _targetLanguage, _nativeLanguage);
 
-            Application.Current.Dispatcher.Invoke(() =>
-            {
-                xNativeWord.Text = translation.Native.Value;
-            });
+            App.UpdateUi(() => { xNativeWord.Text = translation.Native.Value; });
 
             var httpWebRequest = WebRequest.Create($"https://jisho.org/api/v1/search/words?keyword=\"{selectedText}\"");
             var httpResponse = (HttpWebResponse)httpWebRequest.GetResponse();
@@ -89,7 +86,7 @@ namespace DevBook
 
             JishoAdapter data = JsonConvert.DeserializeObject<JishoAdapter>(streamReader.ReadToEnd());
 
-            Application.Current.Dispatcher.Invoke(() =>
+            App.UpdateUi(() =>
             {
                 if (xNativeWord.Text == "" || xNativeWord.Text == null)
                     if (data.Data.Count > 0)
