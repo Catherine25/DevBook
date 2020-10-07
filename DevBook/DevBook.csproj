@@ -68,11 +68,18 @@
     <Compile Include="Data\Command.cs" />
     <Compile Include="Data\Language.cs" />
     <Compile Include="Data\Vocabulary.cs" />
+    <Compile Include="ReadTextControl.xaml.cs">
+      <DependentUpon>ReadTextControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="RequestWindow.xaml.cs">
       <DependentUpon>RequestWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Data\Translation.cs" />
     <Compile Include="Data\Word.cs" />
+    <Compile Include="Services\Loader.cs" />
+    <Compile Include="VocabularyControl.xaml.cs">
+      <DependentUpon>VocabularyControl.xaml</DependentUpon>
+    </Compile>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -85,7 +92,15 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="ReadTextControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="RequestWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="VocabularyControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
