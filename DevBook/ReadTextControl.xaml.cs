@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
@@ -68,22 +69,28 @@ namespace DevBook
             // todo: hightlight the text
 
             if (selectedText != "" && selectedText != " ")
+                new Thread(a => MakeRequest(selectedText)).Start();
+        }
+
+        private void MakeRequest(string selectedText)
+        {
+            Word word = _vocabulary.GetWord(selectedText, _targetLanguage);
+            Translation translation = _vocabulary.GetTranslation(selectedText, _targetLanguage, _nativeLanguage);
+
+            Application.Current.Dispatcher.Invoke(() =>
             {
-                Word word = _vocabulary.GetWord(selectedText, _targetLanguage);
-                Translation translation = _vocabulary.GetTranslation(selectedText, _targetLanguage, _nativeLanguage);
-
-                //check if found
-                //if (word != null)
                 xNativeWord.Text = translation.Native.Value;
+            });
 
-                var httpWebRequest = WebRequest.Create($"https://jisho.org/api/v1/search/words?keyword=\"{selectedText}\"");
-                var httpResponse = (HttpWebResponse)httpWebRequest.GetResponse();
+            var httpWebRequest = WebRequest.Create($"https://jisho.org/api/v1/search/words?keyword=\"{selectedText}\"");
+            var httpResponse = (HttpWebResponse)httpWebRequest.GetResponse();
 
-                using var streamReader = new StreamReader(httpResponse.GetResponseStream());
+            using var streamReader = new StreamReader(httpResponse.GetResponseStream());
 
-                JishoAdapter data = JsonConvert.DeserializeObject<JishoAdapter>(streamReader.ReadToEnd());
-                //data.Data[0].Japanese[0].Reading
+            JishoAdapter data = JsonConvert.DeserializeObject<JishoAdapter>(streamReader.ReadToEnd());
 
+            Application.Current.Dispatcher.Invoke(() =>
+            {
                 if (xNativeWord.Text == "" || xNativeWord.Text == null)
                     if (data.Data.Count > 0)
                     {
@@ -100,7 +107,10 @@ namespace DevBook
 
                         xNativeWord.Text = toShow;
                     }
-            }
+
+                xTargetWordReading.Text = data.Data[0].Japanese[0].Reading;
+            
+            });
         }
 
         private List<Run> FindKnownTranslations(string text)
