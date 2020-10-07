@@ -2,6 +2,12 @@
 {
     public struct Translation
     {
+        public Translation(Word target, Word native)
+        {
+            Target = target;
+            Native = native;
+        }
+
         public Word Target { get; set; }
         public Word Native { get; set; }
 
