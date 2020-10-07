@@ -58,7 +58,7 @@ namespace DevBook.Data
             return translation;
         }
 
-        private List<Translation> GetTranslationsByLanguagePair(Language language1, Language language2)
+        public List<Translation> GetTranslationsByLanguagePair(Language language1, Language language2)
         {
             return _translations
             .Where(t => (t.Target.Language == language1 && t.Native.Language == language2)
