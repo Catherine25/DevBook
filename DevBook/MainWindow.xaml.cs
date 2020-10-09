@@ -66,12 +66,20 @@ namespace DevBook
 
         private void ReadText()
         {
-            Loader loader = new Loader(@"C:\Users\Xiaomi\Documents\01.txt", 512);
-            
-            xMain.Children.Clear();
+            RequestWindow requestWindow = new RequestWindow();
+            bool? result = requestWindow.ShowDialog();
 
-            ReadTextControl control = new ReadTextControl(_vocabulary, _targetLanguage, _nativeLanguage, loader.LoadText());
-            xMain.Children.Add(control);
+            if (result == true)
+            {
+                string filename = requestWindow.xPathBox.Text;
+
+                Loader loader = new Loader(filename, 512);
+
+                xMain.Children.Clear();
+
+                ReadTextControl control = new ReadTextControl(_vocabulary, _targetLanguage, _nativeLanguage, loader.LoadText());
+                xMain.Children.Add(control);
+            }
         }
 
         private void OpenDictionary()
