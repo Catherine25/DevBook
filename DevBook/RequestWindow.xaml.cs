@@ -10,11 +10,22 @@ namespace DevBook
         public RequestWindow()
         {
             InitializeComponent();
+
+            Title = "Enter file path";
+            xOk.Click += XOk_Click;
+            xNok.Click += XNok_Click;
         }
 
-        public RequestWindow(string title)
+        private void XNok_Click(object sender, RoutedEventArgs e)
         {
-            InitializeComponent();
+            DialogResult = false;
+            Close();
+        }
+
+        private void XOk_Click(object sender, RoutedEventArgs e)
+        {
+            DialogResult = true;
+            Close();
         }
     }
 }
