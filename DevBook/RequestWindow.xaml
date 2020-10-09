@@ -10,11 +10,17 @@
         <Grid.RowDefinitions>
             <RowDefinition/>
             <RowDefinition/>
+            <RowDefinition/>
         </Grid.RowDefinitions>
 
         <Grid.ColumnDefinitions>
             <ColumnDefinition/>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
+
+        <Label Content="Enter file path" Grid.ColumnSpan="2" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" />
+        <TextBox x:Name="xPathBox" Margin="10" Grid.Row="1" Grid.ColumnSpan="2" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
+        <Button x:Name="xOk" Grid.Row="2" Margin="10" Content="Ok"/>
+        <Button x:Name="xNok" Grid.Row="2" Grid.Column="1" Margin="10" Content="Cancel"/>
     </Grid>
 </Window>

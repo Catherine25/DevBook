@@ -2,6 +2,7 @@
 using DevBook.Data.Adapters;
 using Newtonsoft.Json;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -77,10 +78,8 @@ namespace DevBook
             Word word = _vocabulary.GetWord(selectedText, _targetLanguage);
             Translation translation = _vocabulary.GetTranslation(selectedText, _targetLanguage, _nativeLanguage);
 
-            Application.Current.Dispatcher.Invoke(() =>
-            {
-                xNativeWord.Text = translation.Native.Value;
-            });
+            if(translation != null)
+                App.UpdateUi(() => { xNativeWord.Text = translation.Native.Value; });
 
             var httpWebRequest = WebRequest.Create($"https://jisho.org/api/v1/search/words?keyword=\"{selectedText}\"");
             var httpResponse = (HttpWebResponse)httpWebRequest.GetResponse();
@@ -89,28 +88,14 @@ namespace DevBook
 
             JishoAdapter data = JsonConvert.DeserializeObject<JishoAdapter>(streamReader.ReadToEnd());
 
-            Application.Current.Dispatcher.Invoke(() =>
-            {
-                if (xNativeWord.Text == "" || xNativeWord.Text == null)
-                    if (data.Data.Count > 0)
-                    {
-                        //then build string
-                        string toShow = "";
+            App.UpdateUi(() => ShowWords(selectedText, data.BuildJapaneseWordsReadings(), data.BuildEnglishWords()));
+        }
 
-                        foreach (Sense sense in data.Data[0].Senses)
-                        {
-                            foreach (string definition in sense.EnglishDefinitions)
-                                toShow += definition + "\t";
-
-                            toShow += "\n";
-                        }
-
-                        xNativeWord.Text = toShow;
-                    }
-
-                xTargetWordReading.Text = data.Data[0].Japanese[0].Reading;
-            
-            });
+        private void ShowWords(string text, string reading, string english)
+        {
+            xTargetWord.Text = text;
+            xTargetWordReading.Text = reading;
+            xNativeWord.Text = english;
         }
 
         private List<Run> FindKnownTranslations(string text)
