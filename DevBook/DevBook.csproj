@@ -65,7 +65,9 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Data\Adapters\JishoAdapter.cs" />
+    <Compile Include="Data\Adapters\WordBuilder.cs" />
     <Compile Include="Data\Command.cs" />
+    <Compile Include="Data\JapaneseWord.cs" />
     <Compile Include="Data\Language.cs" />
     <Compile Include="Data\Vocabulary.cs" />
     <Compile Include="ReadTextControl.xaml.cs">
@@ -76,6 +78,7 @@
     </Compile>
     <Compile Include="Data\Translation.cs" />
     <Compile Include="Data\Word.cs" />
+    <Compile Include="Services\CollectionStringBuilder.cs" />
     <Compile Include="Services\Loader.cs" />
     <Compile Include="VocabularyControl.xaml.cs">
       <DependentUpon>VocabularyControl.xaml</DependentUpon>
