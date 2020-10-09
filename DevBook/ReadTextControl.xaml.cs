@@ -77,7 +77,8 @@ namespace DevBook
             Word word = _vocabulary.GetWord(selectedText, _targetLanguage);
             Translation translation = _vocabulary.GetTranslation(selectedText, _targetLanguage, _nativeLanguage);
 
-            App.UpdateUi(() => { xNativeWord.Text = translation.Native.Value; });
+            if(translation != null)
+                App.UpdateUi(() => { xNativeWord.Text = translation.Native.Value; });
 
             var httpWebRequest = WebRequest.Create($"https://jisho.org/api/v1/search/words?keyword=\"{selectedText}\"");
             var httpResponse = (HttpWebResponse)httpWebRequest.GetResponse();
