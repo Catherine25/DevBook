@@ -1,6 +1,6 @@
 namespace DevBook.Data
 {
-    public struct Word
+    public class Word
     {
         public Word(string value, Language language)
         {

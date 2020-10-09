@@ -1,6 +1,6 @@
 ﻿namespace DevBook.Data
 {
-    public struct Translation
+    public class Translation
     {
         public Translation(Word target, Word native)
         {
