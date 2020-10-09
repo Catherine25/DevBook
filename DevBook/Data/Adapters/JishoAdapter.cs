@@ -1,5 +1,7 @@
-﻿using Newtonsoft.Json;
+﻿using DevBook.Services;
+using Newtonsoft.Json;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace DevBook.Data.Adapters
 {
@@ -10,6 +12,26 @@ namespace DevBook.Data.Adapters
 
         [JsonProperty("data")]
         public List<Data> Data { get; set; }
+        
+        public string BuildEnglishWords()
+        {    
+            WordBuilder wordBuilder = new WordBuilder(Data);
+            List<Word> eWords = wordBuilder.GetEnglishWords();
+
+            string englishWordsText = CollectionStringBuilder.BuildString(eWords.Select(w => w.Value).ToList(), ",\t");
+
+            return englishWordsText;
+        }
+
+        public string BuildJapaneseWordsReadings()
+        {
+            WordBuilder wordBuilder = new WordBuilder(Data);
+            List<JapaneseWord> jWords = wordBuilder.GetJapaneseWords();
+
+            string japaneseWordsReadingText = CollectionStringBuilder.BuildString(jWords.SelectMany(w => w.Readings.Select(r => r)).ToList(), ", ");
+
+            return japaneseWordsReadingText;
+        }
     }
 
     public class Meta
@@ -27,13 +49,13 @@ namespace DevBook.Data.Adapters
         public string IsCommon { get; set; }
 
         [JsonProperty("japanese")]
-        public List<JapaneseWord> Japanese { get; set; }
+        public JWord[] Japanese { get; set; }
 
         [JsonProperty("senses")]
-        public List<Sense> Senses { get; set; }
+        public Sense[] Senses { get; set; }
     }
 
-    public class JapaneseWord
+    public class JWord
     {
         [JsonProperty("word")]
         public string Word { get; set; }
