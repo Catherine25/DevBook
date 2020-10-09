@@ -8,5 +8,4 @@ namespace DevBook
         public static void UpdateUi(Action action) =>
             Application.Current.Dispatcher.Invoke(action);
     }
-
 }
