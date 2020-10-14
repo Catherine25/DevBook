@@ -148,6 +148,7 @@ namespace DevBook
             return runs;
         }
 
+        // TODO: Fix
         private List<Paragraph> SplitToSentences(List<string> textBlocks, char dot)
         {
             List<Paragraph> paragraphs = new List<Paragraph>();
@@ -156,18 +157,37 @@ namespace DevBook
             {
                 Paragraph paragraph = new Paragraph();
 
-                List<string> sentences = item.Split(dot).ToList();
-
-                sentences.RemoveAll(x => x == dot.ToString() + "\r");
-                sentences.RemoveAll(x => x == "\r" + dot.ToString());
+                List<string> sentences = SplitSingleBlock(item, dot);
 
                 foreach (string s in sentences)
-                    paragraph.Inlines.AddRange(FindKnownTranslations(s + dot));
+                    paragraph.Inlines.AddRange(FindKnownTranslations(s));
 
                 paragraphs.Add(paragraph);
             }
 
             return paragraphs;
+        }
+
+        private List<string> SplitSingleBlock(string block, char separator)
+        {
+            List<string> sentences = new List<string>();
+            int count = block.Count(b => b == separator);
+
+            if (count == 0)
+            {
+                sentences.Add(block);
+                return sentences;
+            }
+
+            for (int i = 0; i < count; i++)
+            {
+                int dotIndex = block.IndexOf(separator) + 1;
+                string sentence = new string(block.Take(dotIndex).ToArray());
+                block = block.Remove(0, dotIndex);
+                sentences.Add(sentence);
+            }
+
+            return sentences;
         }
 
         private List<string> SplitToBlocks(string text)
