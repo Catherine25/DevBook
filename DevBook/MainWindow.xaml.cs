@@ -30,7 +30,9 @@ namespace DevBook
             };
 
             InitializeComponent();
+
             xcomboBox.ItemsSource = _commands;
+            xcomboBox.SelectedItem = _commands[0];
             xcomboBox.MouseWheel += XcomboBox_MouseWheel;
             xOkButton.Click += xOkButtonClicked;
 
